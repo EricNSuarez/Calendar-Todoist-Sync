@@ -2,7 +2,7 @@
 
 ## Overview
 
-TodoSync-Cal-Git is a Python project to synchorinize tasks between Todoist and Google Calendar. This tool allows you to manage your to-do list in Todoist while keeping your events organized in Google Calendar.
+Calendar-Todoist-Sync is a Python project to synchronize tasks between Todoist and Google Calendar. This tool allows you to manage your to-do list in Todoist while keeping your events organized in Google Calendar.
 
 ## Features
 
