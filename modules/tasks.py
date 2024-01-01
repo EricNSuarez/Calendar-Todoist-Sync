@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
-from datetime import datetime
+from typing import Dict, List, Optional
+from datetime import datetime, timedelta
 
 @dataclass
 class Task:
@@ -36,7 +36,6 @@ class Task:
     """
     id: int
     datetime_start: datetime
-    datetime_end: datetime
     title: str
     description: str = ''
     duration: int = 15
@@ -46,3 +45,52 @@ class Task:
     calendar_id: Optional[str] = None
     tags: List[str] = field(default_factory=list)
     bidirectional_sync: bool = False
+
+    def __post_init__(self):
+        """
+        Adjust task attributes according to the description and title.
+        """
+        self.datetime_end = self.datetime_start + timedelta(minutes=self.duration)
+
+    def get_properties_from_description_excerpt(self) -> Dict|None:
+        """
+        Extracts sync properties data from the task excerpt delimited by marks on the description:
+
+        Returns:
+        -----------
+            Dict or None:
+                The extracted sync properties data, or None if markers are not found.
+
+        Markers:
+        -----------
+            start:
+                "-----[TODOIST TASK]-----"
+            end: 
+                "-------------------"
+        """
+
+        # Find text between markers
+        start_marker = "-----[TODOIST TASK]-----"
+        end_marker = "-------------------"
+
+        start_idx = self.description.find(start_marker)
+        end_idx = self.description.find(end_marker, start_idx)
+
+        if start_idx == -1 or end_idx == -1:
+            return None
+
+        start_idx += len(start_marker)
+
+        sync_properties = self.description[start_idx:end_idx].strip()
+
+        # Iterate over excerpt to get relevant data
+        result_dict = {'ID':None, 'DURATION': None, 'EVENT_ID': None}
+
+        for line in sync_properties.splitlines():
+            parts = line.split(':')
+            if len(parts) == 2:
+                key = parts[0].strip()
+                value = parts[1].strip()
+                result_dict[key] = value
+        
+        return result_dict
